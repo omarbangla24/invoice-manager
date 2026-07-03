@@ -1,0 +1,14 @@
+name = "invoice-portal-email-worker"
+main = "src/index.ts"
+compatibility_date = "2026-07-03"
+
+[vars]
+# Production Laravel URL. Cloudflare cannot reach localhost.
+LARAVEL_INBOUND_URL = "https://your-domain.com/inbound/email"
+
+# Optional: forward original emails to accountant/admin inbox too.
+# Must be verified in Cloudflare Email Routing destination addresses first.
+FORWARD_TO_EMAIL = ""
+
+# Secret:
+# wrangler secret put INBOUND_EMAIL_TOKEN
