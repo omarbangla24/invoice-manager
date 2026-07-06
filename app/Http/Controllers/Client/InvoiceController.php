@@ -55,11 +55,10 @@ class InvoiceController extends Controller
         abort_unless($client, 403);
 
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'expense_date' => ['nullable', 'date'],
             'amount' => ['nullable', 'numeric', 'min:0'],
-            'currency' => ['required', 'string', 'size:3'],
             'invoice_file' => ['required', 'file', 'max:20480', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,csv,txt'],
         ]);
 
@@ -68,11 +67,11 @@ class InvoiceController extends Controller
         $invoice = $client->invoices()->create($payload + [
             'uploaded_by' => $request->user()->id,
             'source' => 'portal',
-            'title' => $validated['title'],
+            'title' => $validated['title'] ?? $payload['original_filename'],
             'description' => $validated['description'] ?? null,
             'expense_date' => $validated['expense_date'] ?? null,
             'amount' => $validated['amount'] ?? null,
-            'currency' => strtoupper($validated['currency']),
+            'currency' => 'AUD',
         ]);
 
         OptimizeInvoiceFile::dispatch($invoice->id);
