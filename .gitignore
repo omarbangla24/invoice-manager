@@ -14,6 +14,7 @@
 /.zed
 /auth.json
 /node_modules
+node_modules/
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
@@ -25,3 +26,9 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

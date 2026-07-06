@@ -11,6 +11,11 @@
             <a class="btn secondary" target="_blank" href="{{ route('admin.invoices.preview', $invoice) }}">Preview</a>
         @endif
         <a class="btn secondary" href="{{ route('admin.invoices.download', $invoice) }}">Download</a>
+        <form method="post" action="{{ route('admin.invoices.destroy', $invoice) }}" onsubmit="return confirm('Delete this invoice? This cannot be undone.')">
+            @csrf
+            @method('delete')
+            <button class="btn danger" type="submit">Delete</button>
+        </form>
     </div>
 </div>
 <section class="grid two">

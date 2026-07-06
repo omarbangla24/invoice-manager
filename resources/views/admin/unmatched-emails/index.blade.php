@@ -21,7 +21,7 @@
 </form>
 <div class="card">
     <table class="table">
-        <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Files</th><th>Received</th></tr></thead>
+        <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Files</th><th>Received</th><th></th></tr></thead>
         <tbody>
         @forelse($emails as $email)
             <tr>
@@ -30,9 +30,16 @@
                 <td>{{ $email->subject ?: 'No subject' }}</td>
                 <td>{{ $email->attachments_count }}</td>
                 <td>{{ $email->created_at->format('M d, Y h:i A') }}</td>
+                <td>
+                    <form method="post" action="{{ route('admin.unmatched-emails.destroy', $email) }}" onsubmit="return confirm('Delete this email and all its attachments?')">
+                        @csrf
+                        @method('delete')
+                        <button class="btn danger" type="submit" style="padding:4px 10px;font-size:13px">Delete</button>
+                    </form>
+                </td>
             </tr>
         @empty
-            <tr><td colspan="5" class="muted">No unmatched emails.</td></tr>
+            <tr><td colspan="6" class="muted">No unmatched emails.</td></tr>
         @endforelse
         </tbody>
     </table>

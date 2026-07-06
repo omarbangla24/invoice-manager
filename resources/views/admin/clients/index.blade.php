@@ -20,7 +20,7 @@
 </form>
 <div class="card">
     <table class="table">
-        <thead><tr><th>Business</th><th>Email</th><th>Webmail</th><th>Folder</th><th>Invoices</th></tr></thead>
+        <thead><tr><th>Business</th><th>Email</th><th>Webmail</th><th>Folder</th><th>Invoices</th><th></th></tr></thead>
         <tbody>
         @forelse($clients as $client)
             <tr>
@@ -29,9 +29,18 @@
                 <td>{{ $client->webmail_address ?: 'Not set' }}</td>
                 <td>{{ $client->storage_folder }}</td>
                 <td>{{ $client->invoices_count }}</td>
+                <td>
+                    @if($client->invoices_count === 0)
+                        <form method="post" action="{{ route('admin.clients.destroy', $client) }}" onsubmit="return confirm('Delete this client?')">
+                            @csrf
+                            @method('delete')
+                            <button class="btn danger" type="submit" style="padding:4px 10px;font-size:13px">Delete</button>
+                        </form>
+                    @endif
+                </td>
             </tr>
         @empty
-            <tr><td colspan="5" class="muted">No clients yet.</td></tr>
+            <tr><td colspan="6" class="muted">No clients yet.</td></tr>
         @endforelse
         </tbody>
     </table>

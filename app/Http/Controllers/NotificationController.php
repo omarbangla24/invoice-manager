@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -23,5 +23,26 @@ class NotificationController extends Controller
         $request->user()->notifications()->whereNull('read_at')->update(['read_at' => now()]);
 
         return view('notifications.index', ['notifications' => $notifications]);
+    }
+
+    public function feed(Request $request): JsonResponse
+    {
+        $items = $request->user()->notifications()
+            ->whereNull('read_at')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'title' => $notification->title,
+                'body' => $notification->body,
+                'url' => $notification->url,
+                'time' => $notification->created_at->diffForHumans(),
+            ]);
+
+        return response()->json([
+            'count' => $request->user()->notifications()->whereNull('read_at')->count(),
+            'items' => $items,
+        ]);
     }
 }

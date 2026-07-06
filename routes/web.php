@@ -27,6 +27,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth')->name('notifications.index');
+Route::get('/notifications/feed', [NotificationController::class, 'feed'])->middleware('auth')->name('notifications.feed');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
@@ -34,11 +35,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->name('invoices.show');
     Route::patch('/invoices/{invoice}', [AdminInvoiceController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{invoice}', [AdminInvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::get('/invoices/{invoice}/download', [AdminInvoiceController::class, 'download'])->name('invoices.download');
     Route::get('/invoices/{invoice}/preview', [AdminInvoiceController::class, 'preview'])->name('invoices.preview');
     Route::get('/unmatched-emails', [AdminUnmatchedEmailController::class, 'index'])->name('unmatched-emails.index');
     Route::get('/unmatched-emails/{email}', [AdminUnmatchedEmailController::class, 'show'])->name('unmatched-emails.show');
+    Route::delete('/unmatched-emails/{email}', [AdminUnmatchedEmailController::class, 'destroyEmail'])->name('unmatched-emails.destroy');
     Route::patch('/unmatched-attachments/{attachment}/transfer', [AdminUnmatchedEmailController::class, 'transfer'])->name('unmatched-attachments.transfer');
+    Route::delete('/unmatched-attachments/{attachment}', [AdminUnmatchedEmailController::class, 'destroyAttachment'])->name('unmatched-attachments.destroy');
     Route::get('/unmatched-attachments/{attachment}/download', [AdminUnmatchedEmailController::class, 'download'])->name('unmatched-attachments.download');
     Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');

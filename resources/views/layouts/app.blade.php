@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Invoice Portal') }}</title>
-    <link rel="stylesheet" href="/app.css">
-    <script defer src="/app.js"></script>
+    <link rel="stylesheet" href="/app.css?v={{ filemtime(public_path('app.css')) }}">
+    <script defer src="/app.js?v={{ filemtime(public_path('app.js')) }}"></script>
 </head>
 <body>
 @auth
@@ -43,6 +43,24 @@
             <div class="mobile-topbar">
                 <button class="icon-btn" type="button" data-sidebar-open aria-label="Open sidebar">☰</button>
                 <span>Invoice Portal</span>
+            </div>
+            <div class="app-topbar">
+                <div class="notif" data-notif>
+                    <button class="icon-btn notif-btn" type="button" data-notif-toggle aria-label="Notifications">
+                        <svg class="notif-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notif-badge" data-notif-badge hidden>0</span>
+                    </button>
+                    <div class="notif-panel" data-notif-panel hidden>
+                        <div class="notif-panel-head">Notifications</div>
+                        <div class="notif-list" data-notif-list>
+                            <div class="notif-empty">No new notifications.</div>
+                        </div>
+                        <a class="notif-all" href="{{ route('notifications.index') }}">View all</a>
+                    </div>
+                </div>
             </div>
             @if(session('status'))
                 <div class="alert ok">{{ session('status') }}</div>

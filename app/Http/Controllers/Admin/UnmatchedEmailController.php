@@ -105,4 +105,40 @@ class UnmatchedEmailController extends Controller
     {
         return Storage::disk($attachment->storage_disk ?: 'local')->download($attachment->stored_path, $attachment->original_filename);
     }
+
+    public function destroyEmail(InboundEmail $email, AuditLogger $audit): RedirectResponse
+    {
+        foreach ($email->attachments as $attachment) {
+            $disk = $attachment->storage_disk ?: 'local';
+            if ($attachment->stored_path && Storage::disk($disk)->exists($attachment->stored_path)) {
+                Storage::disk($disk)->delete($attachment->stored_path);
+            }
+            $attachment->delete();
+        }
+
+        $audit->log('unmatched_email.deleted', $email, ['from' => $email->from_email, 'subject' => $email->subject]);
+        $email->delete();
+
+        return redirect()->route('admin.unmatched-emails.index')->with('status', 'Unmatched email and its attachments deleted.');
+    }
+
+    public function destroyAttachment(InboundEmailAttachment $attachment, AuditLogger $audit): RedirectResponse
+    {
+        $disk = $attachment->storage_disk ?: 'local';
+        if ($attachment->stored_path && Storage::disk($disk)->exists($attachment->stored_path)) {
+            Storage::disk($disk)->delete($attachment->stored_path);
+        }
+
+        $email = $attachment->inboundEmail;
+        $audit->log('unmatched_attachment.deleted', $attachment, ['filename' => $attachment->original_filename]);
+        $attachment->delete();
+
+        if ($email && ! $email->attachments()->where('status', 'unmatched')->exists()) {
+            if ($email->attachments()->count() === 0) {
+                $email->delete();
+            }
+        }
+
+        return back()->with('status', 'Attachment deleted.');
+    }
 }

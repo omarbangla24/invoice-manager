@@ -6,7 +6,14 @@
         <h1 class="h1">{{ $email->subject ?: 'Unmatched email' }}</h1>
         <p class="muted">From {{ $email->from_email }} • To {{ $email->to_email ?: 'unknown inbox' }}</p>
     </div>
-    <a class="btn secondary" href="{{ route('admin.unmatched-emails.index') }}">Back to Queue</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn secondary" href="{{ route('admin.unmatched-emails.index') }}">Back to Queue</a>
+        <form method="post" action="{{ route('admin.unmatched-emails.destroy', $email) }}" onsubmit="return confirm('Delete this email and all its attachments?')">
+            @csrf
+            @method('delete')
+            <button class="btn danger" type="submit">Delete Email</button>
+        </form>
+    </div>
 </div>
 <section class="card">
     <h2>Email details</h2>
@@ -20,7 +27,7 @@
 <section class="card" style="margin-top:16px">
     <h2>Attachments</h2>
     <table class="table">
-        <thead><tr><th>File</th><th>Size</th><th>Status</th><th>Transfer</th></tr></thead>
+        <thead><tr><th>File</th><th>Size</th><th>Status</th><th>Transfer</th><th></th></tr></thead>
         <tbody>
         @forelse($email->attachments as $attachment)
             <tr>
@@ -51,9 +58,18 @@
                         <span class="muted">Transferred</span>
                     @endif
                 </td>
+                <td>
+                    @if($attachment->status === 'unmatched')
+                        <form method="post" action="{{ route('admin.unmatched-attachments.destroy', $attachment) }}" onsubmit="return confirm('Delete this attachment?')">
+                            @csrf
+                            @method('delete')
+                            <button class="btn danger" type="submit" style="padding:4px 10px;font-size:13px">Delete</button>
+                        </form>
+                    @endif
+                </td>
             </tr>
         @empty
-            <tr><td colspan="4" class="muted">No attachments found.</td></tr>
+            <tr><td colspan="5" class="muted">No attachments found.</td></tr>
         @endforelse
         </tbody>
     </table>

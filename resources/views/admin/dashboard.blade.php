@@ -14,11 +14,7 @@
     <div class="card"><div class="muted">Pending</div><div class="stat">{{ $pendingCount }}</div></div>
     <div class="card"><div class="muted">Done</div><div class="stat">{{ $doneCount }}</div></div>
 </section>
-<section class="grid two" style="margin-top:16px">
-    <div class="card">
-        <h2>Recent invoices</h2>
-        @include('admin.invoices.partials.table', ['invoices' => $recentInvoices])
-    </div>
+<section class="grid" style="margin-top:16px">
     <div class="card">
         <h2>Client folders</h2>
         <table class="table">

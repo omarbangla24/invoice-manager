@@ -23,7 +23,6 @@ class DashboardController extends Controller
             'pendingCount' => $statusCounts[InvoiceStatus::Pending->value] ?? 0,
             'doneCount' => $statusCounts[InvoiceStatus::Done->value] ?? 0,
             'declinedCount' => $statusCounts[InvoiceStatus::Declined->value] ?? 0,
-            'recentInvoices' => Invoice::with('clientProfile.user')->latest()->limit(8)->get(),
             'clients' => ClientProfile::withCount([
                 'invoices',
                 'invoices as pending_invoices_count' => fn ($query) => $query->where('status', InvoiceStatus::Pending),

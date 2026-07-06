@@ -85,6 +85,24 @@ class InvoiceController extends Controller
         return back()->with('status', 'Invoice updated.');
     }
 
+    public function destroy(Invoice $invoice, AuditLogger $audit): RedirectResponse
+    {
+        $disk = $invoice->storage_disk ?: 'local';
+        if ($invoice->stored_path && Storage::disk($disk)->exists($invoice->stored_path)) {
+            Storage::disk($disk)->delete($invoice->stored_path);
+        }
+        if ($invoice->compressed_path && $invoice->compressed_path !== $invoice->stored_path && Storage::disk($disk)->exists($invoice->compressed_path)) {
+            Storage::disk($disk)->delete($invoice->compressed_path);
+        }
+
+        $audit->log('invoice.deleted', $invoice, ['title' => $invoice->title, 'filename' => $invoice->original_filename]);
+        $clientId = $invoice->client_profile_id;
+        $invoice->comments()->delete();
+        $invoice->delete();
+
+        return redirect()->route('admin.clients.show', $clientId)->with('status', 'Invoice deleted.');
+    }
+
     public function download(Invoice $invoice): StreamedResponse
     {
         $path = $invoice->compressed_path ?: $invoice->stored_path;
