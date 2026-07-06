@@ -28,7 +28,6 @@ class InvoicePortalTest extends TestCase
 
         $response = $this->actingAs($client->user)->post(route('client.invoices.store'), [
             'title' => 'Taxi receipt',
-            'currency' => 'USD',
             'invoice_file' => UploadedFile::fake()->create('receipt.txt', 8, 'text/plain'),
         ]);
 
@@ -36,7 +35,25 @@ class InvoicePortalTest extends TestCase
         $invoice = Invoice::firstOrFail();
 
         $this->assertSame($client->id, $invoice->client_profile_id);
+        $this->assertSame('AUD', $invoice->currency);
         $this->assertStringContainsString($client->storage_folder, $invoice->stored_path);
+        Storage::disk('local')->assertExists($invoice->stored_path);
+    }
+
+    public function test_client_can_upload_invoice_without_title_defaults_to_filename(): void
+    {
+        Storage::fake('local');
+        $client = $this->clientProfile('Studio B');
+
+        $response = $this->actingAs($client->user)->post(route('client.invoices.store'), [
+            'invoice_file' => UploadedFile::fake()->create('payment-receipt.pdf', 12, 'application/pdf'),
+        ]);
+
+        $response->assertRedirect(route('client.invoices.index'));
+        $invoice = Invoice::firstOrFail();
+
+        $this->assertSame('payment-receipt.pdf', $invoice->title);
+        $this->assertSame($client->id, $invoice->client_profile_id);
         Storage::disk('local')->assertExists($invoice->stored_path);
     }
 
