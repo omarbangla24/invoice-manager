@@ -141,7 +141,11 @@
                     </ul>
                 </div>
 
-                <div class="form-actions">
+                <div class="form-actions" style="flex-direction:column;gap:12px;align-items:stretch">
+                    <div class="field">
+                        <label>Current password</label>
+                        <input class="input" name="current_password" type="password" required autocomplete="current-password">
+                    </div>
                     <button class="btn" type="submit">Save Email Setup</button>
                 </div>
             </form>
@@ -192,7 +196,11 @@
                     <strong>Cloudflare R2 note</strong>
                     <span>Use S3-compatible API endpoint. Existing local files stay local; new uploads use selected disk.</span>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions" style="flex-direction:column;gap:12px;align-items:stretch">
+                    <div class="field">
+                        <label>Current password</label>
+                        <input class="input" name="current_password" type="password" required autocomplete="current-password">
+                    </div>
                     <button class="btn" type="submit">Save Storage</button>
                 </div>
             </form>

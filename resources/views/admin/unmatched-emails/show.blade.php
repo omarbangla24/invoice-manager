@@ -50,7 +50,6 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="field"><input class="input" name="title" value="{{ $email->subject ?: $attachment->original_filename }}" placeholder="Invoice title"></div>
                             <div class="field"><textarea class="textarea" name="description" placeholder="Optional transfer note"></textarea></div>
                             <button class="btn" type="submit">Transfer to Client</button>
                         </form>

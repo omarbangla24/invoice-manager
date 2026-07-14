@@ -20,6 +20,7 @@
             </div>
             <label><input type="checkbox" name="remember" value="1"> Remember me</label>
             <button class="btn" type="submit">Login</button>
+            <p style="text-align:center;margin-top:12px"><a href="{{ route('password.request') }}" style="color:var(--primary);font-size:14px">Forgot your password?</a></p>
         </form>
     </section>
 </main>

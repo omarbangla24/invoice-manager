@@ -28,6 +28,38 @@
   });
 })();
 
+/* ===== Modals ===== */
+(() => {
+  const overlays = document.querySelectorAll('.modal-overlay');
+  if (!overlays.length) return;
+
+  const close = () => {
+    overlays.forEach((m) => { m.hidden = true; });
+    document.body.style.overflow = '';
+  };
+  const open = (id) => {
+    const m = document.getElementById(id);
+    if (!m) return;
+    m.hidden = false;
+    document.body.style.overflow = 'hidden';
+    const focusable = m.querySelector('input, select, textarea, button');
+    if (focusable) focusable.focus();
+  };
+
+  document.querySelectorAll('[data-modal-open]').forEach((btn) => {
+    btn.addEventListener('click', () => open(btn.getAttribute('data-modal-open')));
+  });
+  document.querySelectorAll('[data-modal-close]').forEach((btn) => {
+    btn.addEventListener('click', close);
+  });
+  overlays.forEach((m) => {
+    m.addEventListener('click', (event) => { if (event.target === m) close(); });
+  });
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') close();
+  });
+})();
+
 (() => {
   const root = document.querySelector('[data-notif]');
   if (!root) return;
@@ -106,4 +138,70 @@
 
   poll();
   setInterval(poll, 15000);
+})();
+
+/* ===== Load More Pagination ===== */
+(() => {
+  document.addEventListener('click', async (event) => {
+    const btn = event.target.closest('.load-more-btn');
+    if (!btn) return;
+
+    event.preventDefault();
+    const nextUrl = btn.dataset.nextUrl;
+    if (!nextUrl) return;
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+
+    try {
+      const response = await fetch(nextUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+      });
+
+      if (!response.ok) throw new Error('Failed to load more');
+
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const newItems = doc.querySelectorAll('.job-row, table tbody tr');
+      const container = document.querySelector('.jobs-list, table tbody');
+
+      if (container && newItems.length > 0) {
+        newItems.forEach((item) => {
+          const clone = item.cloneNode(true);
+          container.appendChild(clone);
+        });
+
+        if (typeof window.bindJobRowEvents === 'function') {
+          window.bindJobRowEvents();
+        }
+
+        const newBtn = doc.querySelector('.load-more-btn');
+        if (newBtn) {
+          btn.dataset.nextUrl = newBtn.dataset.nextUrl;
+          btn.dataset.currentPage = newBtn.dataset.currentPage;
+          btn.disabled = false;
+          btn.textContent = 'Load More';
+        } else {
+          const complete = doc.querySelector('.load-more-complete');
+          if (complete) {
+            btn.outerHTML = complete.outerHTML;
+          } else {
+            btn.remove();
+          }
+        }
+
+        const url = new URL(nextUrl);
+        window.history.replaceState({}, '', url.pathname + url.search);
+      }
+    } catch (error) {
+      console.error('Load more failed:', error);
+      btn.disabled = false;
+      btn.textContent = originalText;
+      alert('Failed to load more items. Please try again.');
+    }
+  });
 })();

@@ -27,7 +27,7 @@ class InvoicePortalTest extends TestCase
         $client = $this->clientProfile('Acme Studio');
 
         $response = $this->actingAs($client->user)->post(route('client.invoices.store'), [
-            'title' => 'Taxi receipt',
+            'description' => 'Taxi receipt',
             'invoice_file' => UploadedFile::fake()->create('receipt.txt', 8, 'text/plain'),
         ]);
 
@@ -36,11 +36,12 @@ class InvoicePortalTest extends TestCase
 
         $this->assertSame($client->id, $invoice->client_profile_id);
         $this->assertSame('AUD', $invoice->currency);
+        $this->assertSame('receipt.txt', $invoice->original_filename);
         $this->assertStringContainsString($client->storage_folder, $invoice->stored_path);
         Storage::disk('local')->assertExists($invoice->stored_path);
     }
 
-    public function test_client_can_upload_invoice_without_title_defaults_to_filename(): void
+    public function test_client_can_upload_invoice_without_description(): void
     {
         Storage::fake('local');
         $client = $this->clientProfile('Studio B');
@@ -52,9 +53,22 @@ class InvoicePortalTest extends TestCase
         $response->assertRedirect(route('client.invoices.index'));
         $invoice = Invoice::firstOrFail();
 
-        $this->assertSame('payment-receipt.pdf', $invoice->title);
+        $this->assertNull($invoice->description);
+        $this->assertSame('payment-receipt.pdf', $invoice->original_filename);
         $this->assertSame($client->id, $invoice->client_profile_id);
         Storage::disk('local')->assertExists($invoice->stored_path);
+    }
+
+    public function test_client_cannot_upload_invoice_without_file(): void
+    {
+        Storage::fake('local');
+        $client = $this->clientProfile('No File Client');
+
+        $this->actingAs($client->user)->post(route('client.invoices.store'), [
+            'description' => 'missing file',
+        ])->assertSessionHasErrors('invoice_file');
+
+        $this->assertDatabaseCount('invoices', 0);
     }
 
     public function test_client_cannot_view_another_clients_invoice(): void
@@ -65,7 +79,6 @@ class InvoicePortalTest extends TestCase
         $invoice = Invoice::create([
             'client_profile_id' => $first->id,
             'uploaded_by' => $first->user_id,
-            'title' => 'Private receipt',
             'original_filename' => 'receipt.pdf',
             'stored_path' => 'clients/first/receipt.pdf',
             'original_size' => 100,
@@ -84,7 +97,6 @@ class InvoicePortalTest extends TestCase
         $invoice = Invoice::create([
             'client_profile_id' => $client->id,
             'uploaded_by' => $client->user_id,
-            'title' => 'Hotel receipt',
             'original_filename' => 'hotel.pdf',
             'stored_path' => 'clients/review/hotel.pdf',
             'original_size' => 100,
@@ -182,6 +194,7 @@ class InvoicePortalTest extends TestCase
 
         $this->actingAs($admin)
             ->patch(route('admin.settings.email.update'), [
+                'current_password' => 'password',
                 'mail_mailer' => 'smtp',
                 'mail_host' => 'smtp.example.com',
                 'mail_port' => 587,
@@ -264,7 +277,6 @@ class InvoicePortalTest extends TestCase
         $this->actingAs($admin)
             ->patch(route('admin.unmatched-attachments.transfer', $attachment), [
                 'client_profile_id' => $client->id,
-                'title' => 'Transferred receipt',
             ])
             ->assertRedirect();
 

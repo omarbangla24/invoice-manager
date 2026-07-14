@@ -65,13 +65,12 @@
                 <div class="file-meta">
                     <span>Business: <strong>{{ $client->business_name }}</strong></span>
                     <span>Contact: {{ $client->contact_name ?: 'Not set' }}</span>
-                    <span>Webmail: {{ $client->webmail_address ?: 'Not set' }}</span>
                     <span>Folder: {{ $client->storage_folder }}</span>
                 </div>
             </div>
             <div class="callout" style="margin-top:14px">
                 <strong>Email invoices</strong>
-                <span>Send receipts from this login email or assigned webmail address.</span>
+                <span>Send receipts from this login email.</span>
             </div>
         </div>
     </article>

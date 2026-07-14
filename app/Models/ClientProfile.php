@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'business_name',
     'contact_name',
     'phone',
-    'tax_identifier',
-    'webmail_address',
     'details',
     'storage_folder',
 ])]
@@ -30,5 +28,10 @@ class ClientProfile extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function jobRequests(): HasMany
+    {
+        return $this->hasMany(JobRequest::class);
     }
 }

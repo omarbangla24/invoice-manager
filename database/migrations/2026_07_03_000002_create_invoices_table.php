@@ -14,10 +14,7 @@ return new class extends Migration
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('source')->default('portal')->index();
             $table->string('status')->default('pending')->index();
-            $table->string('title')->nullable();
             $table->text('description')->nullable();
-            $table->date('expense_date')->nullable()->index();
-            $table->decimal('amount', 12, 2)->nullable();
             $table->string('currency', 3)->default('AUD');
             $table->string('original_filename');
             $table->string('stored_path');

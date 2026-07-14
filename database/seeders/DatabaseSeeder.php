@@ -52,5 +52,7 @@ class DatabaseSeeder extends Seeder
         AppSetting::setValue('inbound_email_address', 'invoices@example.com');
         AppSetting::setValue('inbound_provider', 'Webhook provider not connected');
         AppSetting::setValue('inbound_email_token', 'change-this-token');
+
+        $this->call(JobSeeder::class);
     }
 }

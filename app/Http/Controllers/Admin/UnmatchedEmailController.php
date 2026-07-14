@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\OptimizeInvoiceFile;
 use App\Models\ClientProfile;
 use App\Models\InboundEmail;
 use App\Models\InboundEmailAttachment;
-use App\Jobs\OptimizeInvoiceFile;
 use App\Services\AuditLogger;
 use App\Services\InvoiceFileService;
 use App\Services\Notifier;
@@ -53,7 +53,6 @@ class UnmatchedEmailController extends Controller
     {
         $validated = $request->validate([
             'client_profile_id' => ['required', 'exists:client_profiles,id'],
-            'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -73,9 +72,8 @@ class UnmatchedEmailController extends Controller
         $invoice = $client->invoices()->create($payload + [
             'uploaded_by' => null,
             'source' => 'email',
-            'title' => $validated['title'] ?: ($email->subject ?: $attachment->original_filename),
             'description' => ($validated['description'] ?? null) ?: 'Transferred from unmatched email sent by '.$email->from_email.'.',
-            'currency' => 'USD',
+            'currency' => 'AUD',
         ]);
 
         $attachment->forceFill([
@@ -89,7 +87,7 @@ class UnmatchedEmailController extends Controller
             'attachment_id' => $attachment->id,
             'client_profile_id' => $client->id,
         ]);
-        $notifier->notify($client->user, 'Email invoice assigned', $invoice->title.' was added to your portal.', route('client.invoices.show', $invoice));
+        $notifier->notify($client->user, 'Email invoice assigned', $invoice->original_filename.' was added to your portal.', route('client.invoices.show', $invoice));
 
         if (! $email->attachments()->where('status', 'unmatched')->exists()) {
             $email->forceFill([

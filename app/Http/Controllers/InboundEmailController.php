@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClientProfile;
+use App\Enums\UserRole;
+use App\Jobs\OptimizeInvoiceFile;
 use App\Models\AppSetting;
+use App\Models\ClientProfile;
 use App\Models\InboundEmail;
 use App\Models\User;
-use App\Jobs\OptimizeInvoiceFile;
 use App\Services\AuditLogger;
 use App\Services\InvoiceFileService;
 use App\Services\Notifier;
@@ -35,7 +36,6 @@ class InboundEmailController extends Controller
 
         $client = ClientProfile::query()
             ->whereHas('user', fn ($query) => $query->where('email', $validated['from_email']))
-            ->orWhere('webmail_address', $validated['to_email'] ?? '')
             ->first();
 
         unset($validated['attachments']);
@@ -55,15 +55,14 @@ class InboundEmailController extends Controller
                 $invoice = $client->invoices()->create($payload + [
                     'uploaded_by' => null,
                     'source' => 'email',
-                    'title' => $validated['subject'] ?: $attachment->getClientOriginalName(),
                     'description' => 'Received from '.$validated['from_email'].' via email.',
-                    'currency' => 'USD',
+                    'currency' => 'AUD',
                 ]);
 
                 OptimizeInvoiceFile::dispatch($invoice->id);
                 $audit->log('invoice.email_received', $invoice, ['from' => $validated['from_email']]);
-                User::query()->where('role', \App\Enums\UserRole::Admin)->each(
-                    fn (User $admin) => $notifier->notify($admin, 'Email invoice received', $client->business_name.' sent '.$invoice->title, route('admin.invoices.show', $invoice))
+                User::query()->where('role', UserRole::Admin)->each(
+                    fn (User $admin) => $notifier->notify($admin, 'Email invoice received', $client->business_name.' sent '.$invoice->original_filename, route('admin.invoices.show', $invoice))
                 );
                 $createdInvoices++;
             }

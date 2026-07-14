@@ -14,8 +14,6 @@ return new class extends Migration
             $table->string('business_name')->index();
             $table->string('contact_name')->nullable();
             $table->string('phone')->nullable();
-            $table->string('tax_identifier')->nullable();
-            $table->string('webmail_address')->nullable()->unique();
             $table->text('details')->nullable();
             $table->string('storage_folder')->unique();
             $table->timestamps();

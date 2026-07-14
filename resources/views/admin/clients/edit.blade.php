@@ -20,8 +20,6 @@
         <div class="field"><label>Login email</label><input class="input" name="email" type="email" value="{{ old('email', $client->user->email) }}" required></div>
         <div class="field"><label>New password</label><input class="input" name="password" type="password" placeholder="Leave blank to keep current"></div>
         <div class="field"><label>Phone</label><input class="input" name="phone" value="{{ old('phone', $client->phone) }}"></div>
-        <div class="field"><label>Tax identifier</label><input class="input" name="tax_identifier" value="{{ old('tax_identifier', $client->tax_identifier) }}"></div>
-        <div class="field"><label>Domain webmail address</label><input class="input" name="webmail_address" type="email" value="{{ old('webmail_address', $client->webmail_address) }}"></div>
         <div class="field"><label>Details</label><textarea class="textarea" name="details">{{ old('details', $client->details) }}</textarea></div>
         <button class="btn" type="submit">Save Client</button>
     </form>

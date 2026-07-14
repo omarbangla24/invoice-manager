@@ -54,10 +54,6 @@ class SettingsController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        if (($validated['storage_disk'] ?? 'local') === 's3' && ! class_exists(\League\Flysystem\AwsS3V3\AwsS3V3Adapter::class)) {
-            return back()->withErrors(['storage_disk' => 'S3 adapter missing. Run composer require league/flysystem-aws-s3-v3 before enabling S3/R2.'])->withInput();
-        }
-
         $admin->forceFill([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -75,6 +71,7 @@ class SettingsController extends Controller
     public function updateEmailSettings(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
             'mail_mailer' => ['required', 'string', 'max:50'],
             'mail_host' => ['nullable', 'string', 'max:255'],
             'mail_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
@@ -88,7 +85,7 @@ class SettingsController extends Controller
         ]);
 
         foreach ($validated as $key => $value) {
-            if ($key === 'mail_password' && empty($value)) {
+            if ($key === 'current_password' || ($key === 'mail_password' && empty($value))) {
                 continue;
             }
 
@@ -101,6 +98,7 @@ class SettingsController extends Controller
     public function updateStorageSettings(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
             'storage_disk' => ['required', 'in:local,s3'],
             's3_key' => ['nullable', 'string', 'max:255'],
             's3_secret' => ['nullable', 'string', 'max:255'],
@@ -112,7 +110,7 @@ class SettingsController extends Controller
         ]);
 
         foreach ($validated as $key => $value) {
-            if ($key === 's3_secret' && empty($value)) {
+            if ($key === 'current_password' || ($key === 's3_secret' && empty($value))) {
                 continue;
             }
 
